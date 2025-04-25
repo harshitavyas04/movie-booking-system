@@ -30,8 +30,12 @@ git clone https://github.com/harshitavyas04/movie-booking-system.git
 cd movie-booking-system
 ```
 4. Install Dependencies
-Make sure you have Python and streamlit installed. 
-5. Set Up the Database
+Make sure you have streamlit installed.
+```
+pip install streamlit
+```
+
+6. Set Up the Database
 Create a MySQL database.
 
 Import the provided database.
