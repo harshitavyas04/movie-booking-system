@@ -15,9 +15,14 @@ Welcome to the Movie Booking System — a full-stack cinema booking web applicat
 
 Follow the steps below to clone and run this Movie Booking System project on your local machine.
 
+'''
 git clone https://github.com/harshitavyas04/movie-booking-system.git
+'''
+'''
 cd movie-booking-system
+'''
+'''
 python app.py
-
+'''
 
 
