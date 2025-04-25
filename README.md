@@ -1,6 +1,7 @@
-<h2>🎬 **MOVIE BOOKING SYSTEM - Streamlit App**</h2>
+**<h2>🎬 MOVIE BOOKING SYSTEM - Streamlit App**</h2>
 
 Welcome to the Movie Booking System — a full-stack cinema booking web application built with Streamlit and MySQL. This app allows users to register, log in, browse movies, view theatres and showtimes, select seats, and make payments in a clean, user-friendly interface.
+<br>
 
 **🚀 FEATURES**
 
@@ -19,6 +20,7 @@ Welcome to the Movie Booking System — a full-stack cinema booking web applicat
 💾 Integrated with MySQL database
 
 🎨 Modern UI with custom CSS
+<br>
 
 **🛠️ How to Run the Project Locally**
 
@@ -50,6 +52,7 @@ Update your database credentials in the project if needed.
 streamlit run app.py
 ```
 The app will start running locally, and you can open it in your browser.
+<br>
 
 **📸 SCREENSHOTS**
 
