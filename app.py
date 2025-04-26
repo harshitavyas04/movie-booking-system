@@ -32,7 +32,7 @@ def display_image(image_path):
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["Login", "Register", "Movies", "Theatre", "Seats", "Payment"])
+page = st.sidebar.radio("Go to", ["Login/Register", "Movies", "Theatre", "Seats", "Payment"])
 
 # Session state to store customer ID
 if "custId" not in st.session_state:
@@ -76,67 +76,71 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Login page
-if page == "Login" and st.session_state.custId is None:
-    st.markdown("<h1 class='main-header'>Cinema Booking - Login</h1>", unsafe_allow_html=True)
-    display_image("movie_ticket_booking_poster.png")
-    
-    with st.container():
-        st.markdown("<h2 class='sub-header'>Sign In</h2>", unsafe_allow_html=True)
-        email = st.text_input("Email Id")
-        password = st.text_input("Password", type="password")
-        col1, col2 = st.columns([1,1])
-        with col1:
-            if st.button("LOGIN", use_container_width=True):
-                mycursor.execute('''SELECT CASE WHEN (%s IN (SELECT DISTINCT email FROM customer) AND 
-                                        %s IN (SELECT DISTINCT password FROM customer)) THEN 1 ELSE 0 END AS val''',
-                            (email, password))
-                sql_qry = mycursor.fetchone()
-                if sql_qry[0] == 0:
-                    st.error("Invalid Credentials! Please Try Again...")
-                else:
-                    mycursor.execute('''SELECT ID, name FROM customer WHERE email=%s AND password=%s''', (email, password))
-                    result = mycursor.fetchall()[0]
-                    st.session_state.custId = result[0]
-                    st.session_state.username = result[1]  # Store username
-                    st.success(f"Welcome back, {result[1]}!")
-                    st.rerun()
-        with col2:
-            if st.button("GO TO REGISTER", use_container_width=True):
-                page = "Register"
-                st.rerun()
-
-# Register page
-elif page == "Register" and st.session_state.custId is None:
-    st.markdown("<h1 class='main-header'>Cinema Booking - Registration</h1>", unsafe_allow_html=True)
-    display_image("movie_ticket_booking_poster.png")
-    
-    with st.container():
-        st.markdown("<h2 class='sub-header'>Create Account</h2>", unsafe_allow_html=True)
-        username = st.text_input("Username")
-        email = st.text_input("Email Address")
-        password = st.text_input("Password", type="password")
-        confirm_password = st.text_input("Confirm Password", type="password")
+# Single Login/Register page logic
+if page == "Login/Register":
+    if st.session_state.custId is None:
+        # Display login or registration based on user selection
+        login_or_register = st.radio("Choose an option", ["Login", "Register"])
         
-        if st.button("REGISTER", use_container_width=True):
-            if not username or not email or not password:
-                st.error("All fields are required")
-            elif password != confirm_password:
-                st.error("Passwords do not match")
-            else:
-                mycursor.execute('''SELECT CASE WHEN EXISTS(SELECT email FROM customer WHERE email=%s) THEN 0 ELSE 1 END AS val''', (email,))
-                sql_query = mycursor.fetchall()[0][0]
-                if sql_query == 0:
-                    st.error("Email already in use, please use another")
-                else:
-                    mycursor.execute("INSERT INTO customer(name, email, password) VALUES (%s, %s, %s)", (username, email, password))
-                    mydb.commit()
-                    mycursor.execute('''SELECT MAX(ID), name FROM customer''')
-                    result = mycursor.fetchall()[0]
-                    st.session_state.custId = result[0]
-                    st.session_state.username = result[1]  # Store username
-                    st.success(f"Welcome, {username}! Your account has been created successfully.")
-                    st.rerun()
+        if login_or_register == "Login":
+            st.markdown("<h1 class='main-header'>Cinema Booking - Login</h1>", unsafe_allow_html=True)
+            display_image("movie_ticket_booking_poster.png")
+
+            with st.container():
+                st.markdown("<h2 class='sub-header'>Sign In</h2>", unsafe_allow_html=True)
+                email = st.text_input("Email Id")
+                password = st.text_input("Password", type="password")
+                col1, col2 = st.columns([1,1])
+                with col1:
+                    if st.button("LOGIN", use_container_width=True):
+                        mycursor.execute('''SELECT CASE WHEN (%s IN (SELECT DISTINCT email FROM customer) AND 
+                                            %s IN (SELECT DISTINCT password FROM customer)) THEN 1 ELSE 0 END AS val''',
+                                    (email, password))
+                        sql_qry = mycursor.fetchone()
+                        if sql_qry[0] == 0:
+                            st.error("Invalid Credentials! Please Try Again...")
+                        else:
+                            mycursor.execute('''SELECT ID, name FROM customer WHERE email=%s AND password=%s''', (email, password))
+                            result = mycursor.fetchall()[0]
+                            st.session_state.custId = result[0]
+                            st.session_state.username = result[1]  # Store username
+                            st.success(f"Welcome back, {result[1]}!")
+                            st.rerun()
+                with col2:
+                    if st.button("Go to Register", use_container_width=True):
+                        login_or_register = "Register"
+                        st.experimental_rerun()
+
+        elif login_or_register == "Register":
+            st.markdown("<h1 class='main-header'>Cinema Booking - Registration</h1>", unsafe_allow_html=True)
+            display_image("movie_ticket_booking_poster.png")
+
+            with st.container():
+                st.markdown("<h2 class='sub-header'>Create Account</h2>", unsafe_allow_html=True)
+                username = st.text_input("Username")
+                email = st.text_input("Email Address")
+                password = st.text_input("Password", type="password")
+                confirm_password = st.text_input("Confirm Password", type="password")
+                
+                if st.button("REGISTER", use_container_width=True):
+                    if not username or not email or not password:
+                        st.error("All fields are required")
+                    elif password != confirm_password:
+                        st.error("Passwords do not match")
+                    else:
+                        mycursor.execute('''SELECT CASE WHEN EXISTS(SELECT email FROM customer WHERE email=%s) THEN 0 ELSE 1 END AS val''', (email,))
+                        sql_query = mycursor.fetchall()[0][0]
+                        if sql_query == 0:
+                            st.error("Email already in use, please use another")
+                        else:
+                            mycursor.execute("INSERT INTO customer(name, email, password) VALUES (%s, %s, %s)", (username, email, password))
+                            mydb.commit()
+                            mycursor.execute('''SELECT MAX(ID), name FROM customer''')
+                            result = mycursor.fetchall()[0]
+                            st.session_state.custId = result[0]
+                            st.session_state.username = result[1]  # Store username
+                            st.success(f"Welcome, {username}! Your account has been created successfully.")
+                            st.rerun()
 
 # Movies page
 elif page == "Movies":
@@ -246,68 +250,31 @@ elif page == "Seats":
         show_id = st.session_state.show_id
         
         # Get show details for display
-        mycursor.execute('''
-            SELECT m.name, t.name, h.ID, s.show_date, s.start_time, s.price 
-            FROM shows s
-            JOIN movie m ON s.movie_ID = m.ID
-            JOIN theatre t ON s.theatre_ID = t.ID
-            JOIN hall h ON s.hall_ID = h.ID
-            WHERE s.ID = %s
-        ''', (show_id,))
+                # Get show details for seat availability
+        mycursor.execute('''SELECT ID, seat_ID, book_date, book_time 
+                    FROM seatinline 
+                    WHERE show_ID = %s 
+                    ORDER BY seat_ID''', (show_id,))
+
+        seats = mycursor.fetchall()
         
-        show_details = mycursor.fetchone()
-        if show_details:
-            movie_name, theatre_name, hall_id, show_date, start_time, price = show_details
-            
-            # Display show information
-            st.markdown(f"""
-            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                <h3>{movie_name}</h3>
-                <p><strong>Theatre:</strong> {theatre_name} | <strong>Hall:</strong> {hall_id}</p>
-                <p><strong>Date:</strong> {show_date} | <strong>Time:</strong> {start_time}</p>
-                <p><strong>Price per seat:</strong> ${price}</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Get hall capacity
-        mycursor.execute('''SELECT hall_ID, theatre_ID FROM shows WHERE ID=%s''', (show_id,))
-        info = mycursor.fetchall()
-        h_id, t_id = info[0]
-        mycursor.execute('''SELECT capacity FROM hall WHERE ID=%s AND theatre_ID=%s''', (h_id, t_id))
-        capacity = mycursor.fetchall()[0][0]
-        
-        # Get already booked seats
-        mycursor.execute('''SELECT seat_ID FROM books WHERE show_ID=%s''', (show_id,))
-        booked = [row[0] for row in mycursor.fetchall()]
-        mycursor.execute('''SELECT seat_ID FROM seatinline WHERE show_ID=%s AND book_date=CURDATE()
-                           AND (CAST(CURTIME() AS TIME) - CAST(book_time AS TIME)) <= 1000''', (show_id,))
-        booked.extend(row[0] for row in mycursor.fetchall())
-        
-        # Available seats
-        seats = [i + 1 for i in range(capacity) if i + 1 not in booked]
-        
-        if not seats:
-            st.error("Sorry, all seats are booked for this show!")
-        else:
-            st.markdown("<h3>Available Seats</h3>", unsafe_allow_html=True)
-            
-            # Visual seat layout
-            st.markdown("<div style='text-align: center; margin-bottom: 20px;'>", unsafe_allow_html=True)
-            st.markdown("<div style='background-color: #d3d3d3; padding: 10px; border-radius: 5px;'><b>SCREEN</b></div>", unsafe_allow_html=True)
-            st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)  # Space after screen
-            
-            # Create seat grid
-            selected_seats = st.multiselect("Select Your Seats", options=seats, format_func=lambda x: f"Seat {x}")
-            
-            st.markdown(f"<p>Selected {len(selected_seats)} seat(s) | Total: ${len(selected_seats) * price}</p>", unsafe_allow_html=True)
-            
-            if st.button("Continue to Payment", use_container_width=True):
-                if selected_seats:
-                    st.session_state.selected_seats = selected_seats
-                    st.success("Seats selected! Proceed to payment.")
-                    st.rerun()
-                else:
-                    st.error("Please select at least one seat")
+        # Display seats in rows (like A1 to A10, B1 to B10...)
+        available_seats = [seat for seat in seats if not seat[2]]
+        seat_labels = [seat[1] for seat in available_seats]
+
+        st.markdown("<h2 class='sub-header'>Available Seats</h2>", unsafe_allow_html=True)
+        selected_seats = st.multiselect("Choose your seats", seat_labels)
+
+        if st.button("Confirm Seats", use_container_width=True):
+            if not selected_seats:
+                st.error("Please select at least one seat.")
+            else:
+                # Save selected seat IDs to session
+                seat_ids = [seat[0] for seat in available_seats if seat[1] in selected_seats]
+                st.session_state.seat_ids = seat_ids
+                st.session_state.selected_seat_labels = selected_seats
+                st.success(f"You have selected: {', '.join(selected_seats)}")
+                st.rerun()
 
 # Payment page
 elif page == "Payment":
@@ -316,7 +283,7 @@ elif page == "Payment":
         if st.button("Go to Login"):
             page = "Login"
             st.rerun()
-    elif "selected_seats" not in st.session_state:
+    elif "selected_seat_labels" not in st.session_state:
         st.warning("Please select seats first")
         if st.button("Go to Seat Selection"):
             page = "Seats"
@@ -326,7 +293,7 @@ elif page == "Payment":
         display_image("popcornandstuff.jpeg")
         
         show_id = st.session_state.show_id
-        new_booked = st.session_state.selected_seats
+        new_booked = st.session_state.selected_seats_labels
         
         # Get show details
         mycursor.execute('''SELECT * FROM shows WHERE ID=%s''', (show_id,))
